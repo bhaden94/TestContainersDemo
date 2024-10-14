@@ -15,7 +15,10 @@ public class HttpFunctionTest : IAsyncLifetime
     public HttpFunctionTest()
     {
         _azureFunctionsDockerImage = new ImageFromDockerfileBuilder()
-            .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), "Demo.Function")
+            .WithDockerfileDirectory(
+                CommonDirectoryPath.GetSolutionDirectory(),
+                "Demo.Function"
+            )
             .WithDockerfile("Dockerfile")
             .WithBuildArgument(
                  "RESOURCE_REAPER_SESSION_ID",
