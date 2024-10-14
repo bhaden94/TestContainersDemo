@@ -22,14 +22,14 @@ public class WebApiFixture : IAsyncLifetime
             builder.ConfigureServices((context, services) =>
             {
                 // Line below is used for mocking with Moq
-                //services.AddTransient(x => CreateMockFunctionClient());
+                services.AddTransient(x => CreateMockFunctionClient());
             });
             builder.ConfigureAppConfiguration((context, config) =>
             {
-                //config.AddInMemoryCollection(new Dictionary<string, string?>()
-                //{
-                //    { "FunctionUrl", "http://localhost:1234" }
-                //});
+                config.AddInMemoryCollection(new Dictionary<string, string?>()
+                {
+                    { "FunctionUrl", "http://localhost:1234" }
+                });
             });
         });
     }
