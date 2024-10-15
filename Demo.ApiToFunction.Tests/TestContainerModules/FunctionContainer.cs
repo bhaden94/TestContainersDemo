@@ -3,10 +3,11 @@ using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Images;
 using Testcontainers.Azurite;
 
-namespace Demo.ApiToFunction.Tests.Fixtures;
+namespace Demo.ApiToFunction.Tests.TestContainerModules;
 
-public class FunctionFixture : IAsyncLifetime
+public class FunctionContainer : IAsyncDisposable
 {
+    private readonly AzuriteContainer _azuriteContainerInstance = new AzuriteBuilder().Build();
     // image build
     private readonly IFutureDockerImage _azurefuncDockerImage = new ImageFromDockerfileBuilder()
             .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), "Demo.Function")
@@ -15,9 +16,7 @@ public class FunctionFixture : IAsyncLifetime
                  "RESOURCE_REAPER_SESSION_ID",
                  ResourceReaper.DefaultSessionId.ToString("D"))
             .Build();
-
     private IContainer? azureFunctionsContainerInstance;
-    private AzuriteContainer? azuriteContainerInstance;
 
     public string Hostname => azureFunctionsContainerInstance!.Hostname;
     public ushort MappedPort => azureFunctionsContainerInstance!.GetMappedPublicPort(80);
@@ -25,8 +24,7 @@ public class FunctionFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        azuriteContainerInstance = new AzuriteBuilder().Build();
-        await azuriteContainerInstance.StartAsync();
+        await _azuriteContainerInstance.StartAsync();
 
         // image build
         await _azurefuncDockerImage.CreateAsync();
@@ -35,7 +33,7 @@ public class FunctionFixture : IAsyncLifetime
             // image build
             .WithImage(_azurefuncDockerImage)
             //.WithImage("functionapp:latest")
-            .WithEnvironment("AzureWebJobsStorage", azuriteContainerInstance.GetConnectionString())
+            .WithEnvironment("AzureWebJobsStorage", _azuriteContainerInstance.GetConnectionString())
             .WithPortBinding(80, true)
             .WithWaitStrategy(
                 Wait.ForUnixContainer()
@@ -44,12 +42,11 @@ public class FunctionFixture : IAsyncLifetime
         await azureFunctionsContainerInstance.StartAsync();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await azureFunctionsContainerInstance!.DisposeAsync();
         // image build
         await _azurefuncDockerImage.DisposeAsync();
-        await azuriteContainerInstance!.DisposeAsync();
+        await _azuriteContainerInstance!.DisposeAsync();
     }
 }
-

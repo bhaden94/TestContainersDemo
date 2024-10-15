@@ -4,7 +4,8 @@ using Demo.ApiToFunction.Tests.Shared;
 
 namespace Demo.ApiToFunction.Tests.Controllers;
 
-public class FunctionControllerTestContainers(TestContainersWebApiFixture fixture) : TestContainerIntegrationContext(fixture)
+public class FunctionControllerTestsWithTestContainers(TestContainersWebApiFixture fixture)
+    : TestContainerIntegrationContext(fixture)
 {
     [Fact]
     public async Task ShouldCallGetToFunctionSuccessfully()
